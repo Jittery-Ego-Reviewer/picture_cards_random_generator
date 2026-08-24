@@ -44,29 +44,30 @@
 </head>
 <body class="bg-gray-100 h-screen flex flex-col font-sans overflow-hidden">
 
-    <header class="bg-white shadow-sm p-4 z-10 flex-shrink-0">
-        <div class="max-w-4xl mx-auto flex flex-col sm:flex-row gap-4 items-center justify-between">
-            <h1 class="text-xl font-bold text-blue-600">圖卡訓練系統</h1>
-            
-            <div class="flex gap-2 w-full sm:w-auto">
-                <label class="flex-1 sm:flex-none cursor-pointer bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg text-center font-medium transition-colors">
-                    <span>載入圖片資料夾</span>
-                    <!-- 加入 webkitdirectory 允許選擇整個資料夾，以便讀取資料夾結構作為分類 -->
-                    <input type="file" id="image-upload" class="hidden" accept="image/*" webkitdirectory directory multiple>
-                </label>
+    <header class="bg-white shadow-sm p-3 z-10 flex-shrink-0">
+        <div class="max-w-4xl mx-auto flex items-center justify-between gap-3">
+            <!-- 分類選擇器 (預設隱藏，載入圖片後顯示) -->
+            <div id="category-selector-container" class="hidden flex-1 flex gap-2 items-center">
+                <select id="category-selector" class="flex-1 p-2 border border-gray-300 rounded-lg text-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
+                    <option value="all">所有類別</option>
+                    <!-- 分類選項將透過 JS 動態加入 -->
+                </select>
+                <button id="shuffle-btn" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg text-center font-medium transition-colors flex items-center justify-center gap-1 shadow-sm shrink-0" title="重新洗牌剩餘字卡">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    <span class="hidden sm:inline">洗牌</span>
+                </button>
             </div>
-        </div>
-        
-        <!-- 分類選擇器 (預設隱藏，載入圖片後顯示) -->
-        <div id="category-selector-container" class="max-w-4xl mx-auto mt-4 hidden flex gap-2">
-            <select id="category-selector" class="flex-1 p-2 border border-gray-300 rounded-lg text-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                <option value="all">所有類別</option>
-                <!-- 分類選項將透過 JS 動態加入 -->
-            </select>
-            <button id="shuffle-btn" class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg text-center font-medium transition-colors flex items-center justify-center gap-1 shadow-sm" title="重新洗牌剩餘字卡">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                <span class="hidden sm:inline">洗牌</span>
-            </button>
+
+            <!-- 右上角小巧按鈕：載入/更新圖片資料夾 -->
+            <label class="cursor-pointer bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-700 p-2.5 rounded-lg transition-colors flex items-center justify-center gap-1.5 shrink-0 ml-auto border border-gray-200 shadow-sm" title="載入/更新圖片資料夾">
+                <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11v6m0 -6l-2 2m2-2l2 2"></path>
+                </svg>
+                <span id="upload-btn-text" class="text-xs font-medium hidden sm:inline text-gray-600">資料夾</span>
+                <!-- 加入 webkitdirectory 允許選擇整個資料夾，以便讀取資料夾結構作為分類 -->
+                <input type="file" id="image-upload" class="hidden" accept="image/*" webkitdirectory directory multiple>
+            </label>
         </div>
     </header>
 
@@ -74,10 +75,9 @@
         
         <!-- 初始提示訊息 -->
         <div id="welcome-message" class="text-center text-gray-500 z-0">
-            <svg class="w-20 h-20 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-            <p class="text-xl font-medium">請點擊上方按鈕，載入包含分類的「images」資料夾</p>
-            <p class="text-sm mt-2">提示：程式會自動將資料夾名稱當作分類，圖片名稱當作字卡</p>
-            <p class="text-xs mt-1">(例如路徑：/images/水果/蘋果.png)</p>
+            <svg class="w-20 h-20 mx-auto text-gray-400 mb-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+            <p id="welcome-title" class="text-xl font-medium text-gray-600">正在檢查是否有已儲存的字卡...</p>
+            <p id="welcome-desc" class="text-sm mt-2 text-gray-500">首次使用，請載入包含分類的「images」資料夾。<br>載入後系統會自動記憶，下次打開無需重新上傳！</p>
         </div>
 
         <!-- 卡片將會透過 JS 動態產生並放在這裡 -->
@@ -88,71 +88,144 @@
     </footer>
 
     <script>
-        // 核心狀態變數
-        let allCards = [];      // 儲存所有解析出的卡片資料 { id, name, category, url }
-        let currentCards = [];  // 目前選擇類別下，要顯示的卡片佇列
-        let categories = new Set(); // 收集到的所有分類
+        let allCards = [];      
+        let currentCards = [];  
+        let categories = new Set(); 
+        let db; // 瀏覽器本地資料庫實例
         
         const uploadInput = document.getElementById('image-upload');
         const container = document.getElementById('card-container');
         const welcomeMessage = document.getElementById('welcome-message');
+        const welcomeTitle = document.getElementById('welcome-title');
+        const welcomeDesc = document.getElementById('welcome-desc');
         const categoryContainer = document.getElementById('category-selector-container');
         const categorySelector = document.getElementById('category-selector');
         const shuffleBtn = document.getElementById('shuffle-btn');
         const progressText = document.getElementById('progress-text');
+        const uploadBtnText = document.getElementById('upload-btn-text');
 
-        uploadInput.addEventListener('change', function(e) {
+        // 初始化瀏覽器資料庫 (IndexedDB)
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open('SpeechCardsDB', 1);
+                request.onerror = () => reject('資料庫開啟失敗');
+                request.onsuccess = (e) => {
+                    db = e.target.result;
+                    resolve();
+                };
+                request.onupgradeneeded = (e) => {
+                    db = e.target.result;
+                    if (!db.objectStoreNames.contains('cards')) {
+                        db.createObjectStore('cards', { keyPath: 'id' });
+                    }
+                };
+            });
+        }
+
+        // 將圖片儲存到本地資料庫
+        function saveCardsToDB(cards) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(['cards'], 'readwrite');
+                const store = transaction.objectStore('cards');
+                store.clear(); // 儲存新資料前先清空舊資料
+                cards.forEach(card => store.add(card));
+                transaction.oncomplete = () => resolve();
+                transaction.onerror = () => reject();
+            });
+        }
+
+        // 從本地資料庫讀取圖片
+        function loadCardsFromDB() {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(['cards'], 'readonly');
+                const store = transaction.objectStore('cards');
+                const request = store.getAll();
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject();
+            });
+        }
+
+        // 網頁開啟時，自動嘗試從資料庫讀取
+        window.addEventListener('DOMContentLoaded', async () => {
+            try {
+                await initDB();
+                const savedCards = await loadCardsFromDB();
+                if (savedCards && savedCards.length > 0) {
+                    processCardsData(savedCards);
+                    uploadBtnText.textContent = "更新資料夾";
+                } else {
+                    welcomeTitle.textContent = "請點擊右上角圖示，載入包含分類的資料夾";
+                }
+            } catch (error) {
+                console.error("無法讀取資料庫:", error);
+                welcomeTitle.textContent = "請點擊右上角圖示，載入包含分類的資料夾";
+            }
+        });
+
+        uploadInput.addEventListener('change', async function(e) {
             const files = e.target.files;
             if (files.length === 0) return;
 
-            allCards = [];
-            categories.clear();
-            categorySelector.innerHTML = '<option value="all">所有類別</option>';
+            // 顯示處理中訊息
+            welcomeMessage.style.display = 'block';
+            welcomeTitle.textContent = "正在處理並儲存圖片，請稍候...";
+            welcomeDesc.style.display = 'none';
+
+            let newCards = [];
 
             Array.from(files).forEach((file, index) => {
-                // 讀取檔名並去掉副檔名
                 const fullName = file.name.replace(/\.[^/.]+$/, "");
                 let category = "未分類";
                 let wordName = fullName;
 
-                // 嘗試從資料夾路徑解析分類 (例如: images/水果/蘋果.png)
                 if (file.webkitRelativePath) {
                     const pathParts = file.webkitRelativePath.split('/');
-                    // 如果路徑長度大於1，代表有資料夾層級
                     if (pathParts.length > 1) {
-                        // 取得檔案的上一層資料夾名稱作為分類
                         const folderName = pathParts[pathParts.length - 2];
-                        // 排除根目錄如果直接命名為 images 等無意義分類
                         if (folderName.toLowerCase() !== 'images' && folderName !== '') {
                             category = folderName;
                         }
                     }
                 }
 
-                // 備用方案：如果還是未分類，嘗試解析檔名格式 (類別-詞彙)
                 if (category === "未分類" && fullName.includes('-')) {
                     const parts = fullName.split('-');
                     category = parts[0].trim();
-                    wordName = parts.slice(1).join('-').trim(); // 處理詞彙中本身有橫線的情況
+                    wordName = parts.slice(1).join('-').trim();
                 }
 
-                categories.add(category);
-
-                // 產生供瀏覽器顯示的 Blob URL
-                const fileUrl = URL.createObjectURL(file);
-
-                allCards.push({
+                // 將真實的檔案 (Blob) 存起來，而不是暫時的網址
+                newCards.push({
                     id: index,
                     name: wordName,
                     category: category,
-                    url: fileUrl
+                    blob: file 
                 });
             });
 
-            // 準備分類選單
+            try {
+                await saveCardsToDB(newCards); // 存入資料庫
+                processCardsData(newCards);    // 更新畫面
+                uploadBtnText.textContent = "更新資料夾";
+            } catch (err) {
+                alert("儲存失敗，可能是圖片總容量超過瀏覽器限制。");
+                welcomeTitle.textContent = "儲存失敗，請重試或減少圖片數量";
+            }
+        });
+
+        // 整理讀取到的卡片資料並設定下拉選單
+        function processCardsData(cardsData) {
+            allCards = cardsData;
+            categories.clear();
+            categorySelector.innerHTML = '<option value="all">所有類別</option>';
+
+            allCards.forEach(card => {
+                categories.add(card.category);
+            });
+
             if (categories.size > 0) {
                 categoryContainer.classList.remove('hidden');
-                categoryContainer.classList.add('flex'); // 改用 flex 顯示，以並排按鈕
+                categoryContainer.classList.add('flex');
                 Array.from(categories).sort().forEach(cat => {
                     const option = document.createElement('option');
                     option.value = cat;
@@ -161,10 +234,9 @@
                 });
             }
 
-            // 隱藏歡迎訊息，開始遊戲
             welcomeMessage.style.display = 'none';
             loadCategory('all');
-        });
+        }
 
         categorySelector.addEventListener('change', (e) => {
             loadCategory(e.target.value);
@@ -172,17 +244,16 @@
 
         shuffleBtn.addEventListener('click', () => {
             if (currentCards.length > 1) {
-                // 清空畫面上現有的卡片
                 const existingCards = container.querySelectorAll('.card');
-                existingCards.forEach(c => c.remove());
+                existingCards.forEach(c => {
+                    // 清理不再顯示的卡片產生的臨時網址
+                    if(c.dataset.blobUrl) URL.revokeObjectURL(c.dataset.blobUrl);
+                    c.remove();
+                });
                 
-                // 將目前剩餘的卡片重新洗牌
                 shuffleArray(currentCards);
-                
-                // 重新顯示最上層的卡片
                 renderTopCard();
                 
-                // 給予視覺回饋，讓按鈕閃爍一下
                 const originalBg = shuffleBtn.className;
                 shuffleBtn.classList.replace('bg-green-500', 'bg-green-700');
                 setTimeout(() => {
@@ -192,27 +263,27 @@
         });
 
         function loadCategory(category) {
-            // 清空畫面上的卡片
             const existingCards = container.querySelectorAll('.card');
-            existingCards.forEach(c => c.remove());
+            existingCards.forEach(c => {
+                if(c.dataset.blobUrl) URL.revokeObjectURL(c.dataset.blobUrl);
+                c.remove();
+            });
 
-            // 篩選卡片
             if (category === 'all') {
                 currentCards = [...allCards];
             } else {
                 currentCards = allCards.filter(card => card.category === category);
             }
             
-            // 打亂陣列順序 (洗牌)
             shuffleArray(currentCards);
-            
             updateProgress();
             
             if (currentCards.length > 0) {
                 renderTopCard();
             } else {
                 welcomeMessage.style.display = 'block';
-                welcomeMessage.innerHTML = '<p class="text-xl font-medium">此類別沒有字卡了</p>';
+                welcomeTitle.textContent = "此類別沒有字卡了";
+                welcomeDesc.style.display = 'none';
             }
         }
 
@@ -229,21 +300,23 @@
                 return;
             }
 
-            const cardData = currentCards[currentCards.length - 1]; // 取陣列最後一個作為最上層
+            const cardData = currentCards[currentCards.length - 1]; 
+            
+            // 每次要顯示卡片時，才為資料庫裡的檔案產生臨時網址 (節省記憶體)
+            const tempUrl = URL.createObjectURL(cardData.blob);
 
             const cardEl = document.createElement('div');
-            // 設定卡片樣式，填滿大部分螢幕空間
             cardEl.className = 'card absolute bg-white rounded-3xl overflow-hidden flex flex-col cursor-grab select-none';
             cardEl.style.width = 'min(90vw, 500px)';
             cardEl.style.height = 'min(75vh, 700px)';
             cardEl.style.maxWidth = '100%';
             cardEl.style.maxHeight = '100%';
             cardEl.style.zIndex = 10;
+            cardEl.dataset.blobUrl = tempUrl; // 記錄網址以便後續清理
 
-            // 卡片內部結構：圖片在上，文字在下
             cardEl.innerHTML = `
                 <div class="flex-1 bg-gray-50 p-4 flex items-center justify-center relative overflow-hidden">
-                    <img src="${cardData.url}" alt="${cardData.name}" class="max-w-full max-h-full object-contain pointer-events-none" draggable="false">
+                    <img src="${tempUrl}" alt="${cardData.name}" class="max-w-full max-h-full object-contain pointer-events-none" draggable="false">
                 </div>
                 <div class="bg-white p-6 sm:p-8 flex items-center justify-center border-t-4 border-blue-100 flex-shrink-0">
                     <h2 class="text-4xl sm:text-6xl font-black text-gray-800 tracking-wider">${cardData.name}</h2>
@@ -259,7 +332,7 @@
             let startX = 0;
             let currentX = 0;
             let isDragging = false;
-            const threshold = window.innerWidth * 0.25; // 螢幕寬度的 25% 作為觸發閾值
+            const threshold = window.innerWidth * 0.25; 
 
             function onDragStart(clientX) {
                 isDragging = true;
@@ -271,7 +344,6 @@
             function onDragMove(clientX) {
                 if (!isDragging) return;
                 currentX = clientX - startX;
-                // 計算旋轉角度，隨拖曳距離增加
                 const rotate = currentX * 0.05; 
                 card.style.transform = `translateX(${currentX}px) rotate(${rotate}deg)`;
             }
@@ -282,7 +354,6 @@
                 card.classList.remove('swiping');
                 card.style.cursor = 'grab';
 
-                // 判斷是否超過閾值，決定是移出還是彈回
                 if (Math.abs(currentX) > threshold) {
                     if (currentX > 0) {
                         card.classList.add('swiped-right');
@@ -290,33 +361,26 @@
                         card.classList.add('swiped-left');
                     }
                     
-                    // 等待動畫結束後移除 DOM 並載入下一張
                     setTimeout(() => {
+                        // 清理圖片網址記憶體並移除節點
+                        URL.revokeObjectURL(card.dataset.blobUrl); 
                         card.remove();
-                        currentCards.pop(); // 從陣列中移除
-                        
-                        // 清理 Blob URL 釋放記憶體
-                        // URL.revokeObjectURL(currentCards[currentCards.length]? url); 
-                        // 註: 因為有可能切換分類後再切回來，所以暫不釋放 URL，直到重新上傳檔案。
-
+                        currentCards.pop(); 
                         renderTopCard();
-                    }, 300); // 需與 CSS transition 時間一致
+                    }, 300); 
                 } else {
-                    // 彈回原位
                     card.style.transform = '';
                 }
                 currentX = 0;
             }
 
-            // 觸控事件 (手機/平板)
             card.addEventListener('touchstart', (e) => onDragStart(e.touches[0].clientX), {passive: true});
             card.addEventListener('touchmove', (e) => onDragMove(e.touches[0].clientX), {passive: true});
             card.addEventListener('touchend', onDragEnd);
             card.addEventListener('touchcancel', onDragEnd);
 
-            // 滑鼠事件 (電腦)
             card.addEventListener('mousedown', (e) => onDragStart(e.clientX));
-            window.addEventListener('mousemove', (e) => onDragMove(e.clientX)); // 綁在 window 防止滑鼠移出卡片時失效
+            window.addEventListener('mousemove', (e) => onDragMove(e.clientX)); 
             window.addEventListener('mouseup', onDragEnd);
         }
 
